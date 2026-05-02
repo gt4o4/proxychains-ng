@@ -157,6 +157,24 @@ int main(int argc, char *argv[]) {
 	         old_val ? LD_PRELOAD_SEP : "",
 	         old_val ? old_val : "");
 	putenv(buf);
+
+	/* Unset *_PROXY / *_proxy env vars to prevent double-proxying.
+	   When proxychains intercepts connections via LD_PRELOAD, having
+	   HTTP_PROXY etc. set would cause the child to try the env-var
+	   proxy on top of proxychains' SOCKS5 interception. */
+	unsetenv("HTTP_PROXY");
+	unsetenv("HTTPS_PROXY");
+	unsetenv("ALL_PROXY");
+	unsetenv("FTP_PROXY");
+	unsetenv("RSYNC_PROXY");
+	unsetenv("NO_PROXY");
+	unsetenv("http_proxy");
+	unsetenv("https_proxy");
+	unsetenv("all_proxy");
+	unsetenv("ftp_proxy");
+	unsetenv("rsync_proxy");
+	unsetenv("no_proxy");
+
 	execvp(argv[start_argv], &argv[start_argv]);
 	fprintf(stderr, "proxychains: can't load process '%s'.", argv[start_argv]);
 	perror(" (hint: it's probably a typo)");
